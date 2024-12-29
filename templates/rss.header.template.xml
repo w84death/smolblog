@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+  <title>smol[weblog]</title>
+  <link>https://smol.p1x.in/weblog/</link>
+  <description>A place where I write text files. Started at December 2024.</description>
+  <lastBuildDate>%s</lastBuildDate>
+</channel>
+</rss>

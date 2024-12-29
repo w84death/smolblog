@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+  <title>smol[weblog]</title>
+  <link>https://smol.p1x.in/weblog/</link>
+  <description>A place where I write text files. Started at December 2024.</description>
+  <lastBuildDate>Sun, 29 Dec 2024 14:19:29 +0100</lastBuildDate>
+</channel>
+</rss>
+<item>
+    <title><a href="posts/general/another.html">Test post</title>
+    <link>https://smol.p1x.in/weblog/posts/general/another.html</link>
+    <guid>https://smol.p1x.in/weblog/posts/general/another.html</guid>
+    <pubDate>2024-12-29 14:17</pubDate>
+  </item>
+<item>
+    <title><a href="posts/general/start-blog-project.html">My smol blogging platform made in C</title>
+    <link>https://smol.p1x.in/weblog/posts/general/start-blog-project.html</link>
+    <guid>https://smol.p1x.in/weblog/posts/general/start-blog-project.html</guid>
+    <pubDate>2024-12-29 14:17</pubDate>
+  </item>
+<item>
+    <title><a href="posts/freeform/free1.html">Free form writing #1</title>
+    <link>https://smol.p1x.in/weblog/posts/freeform/free1.html</link>
+    <guid>https://smol.p1x.in/weblog/posts/freeform/free1.html</guid>
+    <pubDate>2024-12-29 14:17</pubDate>
+  </item>
+
+</channel>
+</rss>

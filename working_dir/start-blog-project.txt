@@ -1,0 +1,23 @@
+My smol blogging platform made in C
+I was not satisfied with any of the blogging platfom so I made my own with black jack and h00kers.
+It is once C file that compiles to 10KB Linux binary.
+
+You interact with it with files. Project has this structure:
+* /working_dir/
+* /generate/
+* /public_html/
+* /templates/
+
+/working_dir/ is where all the text files are organized in folders. Each folder is a tag.
+/generete/ is where the engine looks for a new files to cranch. It will move it to the /public_html/ folder and update the index file.
+/templates/ keeps template files for the layout of the blog.
+
+It is simple, lean and easy to use.
+
+How to compile:
+* gcc smolblog.c -o smolblog
+* upx smolblog
+
+Usage:
+* ./smolblog
+* copy text files into the /generate/ folder.
