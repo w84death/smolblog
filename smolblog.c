@@ -57,8 +57,8 @@ void process_file(const char *src_path, const char *dst_path, const char *catego
     char line[MAX_LINE], title[MAX_LINE] = "", header[MAX_LINE] = "";
     char footer[MAX_LINE] = "", content[MAX_LINE * 10] = "";
     
-    read_template("templates/post.header.template.html", header);  // Changed to use post header
-    read_template("templates/footer.template.html", footer);
+    read_template("templates/post.header.template.html", header);
+    read_template("templates/post.footer.template.html", footer);  // Changed to use post-specific footer
     
     FILE *src = fopen(src_path, "r");
     if (!src) return;
