@@ -1,10 +1,10 @@
 :root {
-    --text-color: #f2ab00;
-    --bg-color: #0a1118;
-    --accent-color: #3498db;
-    --light-gray: #f5f6fa;
+    --text-color: yellow;
+    --bg-color: #11101a;
+    --accent-color: lightblue;
+    --light-gray: whitesmoke;
     --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, monospace;
-    --font-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --font-mono: "Courier", "MS Gothic", "VT323", monospace;
 }
 
 body { 
@@ -20,6 +20,7 @@ body {
 
 .post { 
     margin: 3rem 0;
+    text-shadow: 1px 1px 0px black
 }
 
 .posts {
@@ -43,22 +44,23 @@ h1 {
     line-height: 1.2;
     margin: 2rem 0 1rem;
     color: var(--light-gray);
+    text-transform: uppercase;
 }
 
 .date {
-    color: #718096;
+    color: lightslategray;
     font-size: 0.9rem;
     margin: 1rem 0;
 }
 
 footer {
     margin-top: 4rem;
-    color: #718096;
+    color: lightslategray;
     font-size: 0.9rem;
 }
 
 p {
-    margin: 1.5rem 0;
+    margin: 1.5rem 0;;
 }
 
 @media (max-width: 768px) {
