@@ -11,6 +11,28 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <time.h>
+#include <stdarg.h>
+
+// Add logging function
+void log_message(const char *format, ...) {
+    time_t now;
+    struct tm *tm_info;
+    char timestamp[26];
+    
+    time(&now);
+    tm_info = localtime(&now);
+    strftime(timestamp, 26, "%Y-%m-%d %H:%M:%S", tm_info);
+    
+    va_list args;
+    va_start(args, format);
+    
+    printf("[%s] ", timestamp);
+    vprintf(format, args);
+    printf("\n");
+    
+    va_end(args);
+    fflush(stdout);
+}
 
 #define MAX_PATH 1024
 #define MAX_LINE 4096
@@ -46,7 +68,9 @@ void format_date(char *date_str, size_t size) {
     strftime(date_str, size, "%Y-%m-%d %H:%M", t);
 }
 
+// Modify process_file to use new logging
 void process_file(const char *src_path, const char *dst_path, const char *category) {
+    log_message("Processing file: %s -> %s (category: %s)", src_path, dst_path, category);
     char html_path[MAX_PATH], txt_path[MAX_PATH];
     strcpy(html_path, dst_path);
     strcpy(txt_path, dst_path);
@@ -106,7 +130,7 @@ void process_file(const char *src_path, const char *dst_path, const char *catego
         fclose(df);
     }
 
-    printf("Processed: %s\n", src_path);
+    log_message("Successfully processed: %s", src_path);
 }
 
 void extract_title_from_txt(const char *filepath, char *title, size_t title_size) {
@@ -234,9 +258,9 @@ void generate_rss_feed(const char *posts_list) {
 }
 
 void update_index() {
-    printf("Updating index file...\n");
+    log_message("Updating index file...");
     copy_static_assets();
-    printf("Static assets copied\n");
+    log_message("Static assets copied");
     
     char header[MAX_LINE] = "", footer[MAX_LINE] = "";
     char index_template[MAX_LINE] = "", posts_list[MAX_LINE * 10] = "";
@@ -305,7 +329,7 @@ void update_index() {
     
     FILE *index = fopen("public_html/index.html", "w");
     if (!index) {
-        printf("Error: Could not create index.html\n");
+        log_message("Error: Could not create index.html");
         return;
     }
     
@@ -320,18 +344,30 @@ void update_index() {
     fprintf(index, "%s", footer);
     fclose(index);
     
-    printf("Index file updated\n");
+    log_message("Index file updated");
     generate_rss_feed(posts_list);
 }
 
-void process_ready_folder() {
+// Add statistics struct
+typedef struct {
+    int files_processed;
+    int categories_found;
+    int errors_encountered;
+} ProcessStats;
+
+// Modify process_ready_folder to track statistics
+void process_ready_folder(ProcessStats *stats) {
     DIR *dir = opendir("generate");
-    if (!dir) return;
+    if (!dir) {
+        log_message("Error: Could not open generate directory");
+        return;
+    }
 
     char default_posts_path[MAX_PATH];
     snprintf(default_posts_path, sizeof(default_posts_path), "public_html/posts/general");
     mkdir(default_posts_path, 0755);
     
+    stats->categories_found = 0;
     struct dirent *entry;
     while ((entry = readdir(dir)) != NULL) {
         if (entry->d_type == DT_REG && strstr(entry->d_name, ".txt")) {
@@ -345,8 +381,10 @@ void process_ready_folder() {
             
             process_file(src_path, dst_path, "general");
             if (access(dst_path, F_OK) == 0) remove(src_path);
+            stats->files_processed++;
         }
         else if (entry->d_type == DT_DIR && strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+            stats->categories_found++;
             char ready_path[MAX_PATH], posts_path[MAX_PATH];
             
             snprintf(ready_path, sizeof(ready_path), "generate/%s", entry->d_name);
@@ -370,6 +408,7 @@ void process_ready_folder() {
                     
                     process_file(src_path, dst_path, entry->d_name);
                     if (access(dst_path, F_OK) == 0) remove(src_path);
+                    stats->files_processed++;
                 }
             }
             closedir(cat_dir);
@@ -379,23 +418,30 @@ void process_ready_folder() {
     update_index();
 }
 
+// Replace main() with new version
 int main() {
-    printf("Starting blog generator...\n");
+    ProcessStats stats = {0, 0, 0};
+    log_message("Starting blog generator (one-time run)");
     
+    // Create required directories
     mkdir("working_dir", 0755);
     mkdir("generate", 0755);
     mkdir("public_html", 0755);
     mkdir("public_html/posts", 0755);
     
-    // Copy static assets on startup too
+    // Copy static assets
+    log_message("Copying static assets");
     copy_static_assets();
     
-    while (1) {
-        process_ready_folder();
-        printf(".");
-        fflush(stdout);
-        sleep(5);
-    }
+    // Process files
+    log_message("Starting file processing");
+    process_ready_folder(&stats);
+    
+    // Print summary
+    log_message("Processing complete. Summary:");
+    log_message("- Files processed: %d", stats.files_processed);
+    log_message("- Categories found: %d", stats.categories_found);
+    log_message("- Errors encountered: %d", stats.errors_encountered);
     
     return 0;
 }

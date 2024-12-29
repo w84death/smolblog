@@ -28,12 +28,16 @@ A lightweight blogging platform and static site generator written in C.
 ### Usage
 
 1. Create your posts in clear text format in the `working_dir/` directory
-2. Run smolblog to listen for changes:
+2. Run smolblog once to create folders:
    ```bash
    ./smolblog
    ```
 3. Copy ready to generate posts to /generate/
-3. Your static site will be generated in the `output/` directory
+4. Run generation
+   ```bash
+   ./smolblog
+   ```
+5. Your static site will be generated in the `output/` directory
 
 ## License
 
