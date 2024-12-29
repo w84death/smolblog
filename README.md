@@ -9,6 +9,8 @@ A lightweight blogging platform and static site generator written in C.
 - No external dependencies
 - Easy to customize
 
+![Example blog](example.png)
+
 ## Getting Started
 
 ### Prerequisites
