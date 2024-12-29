@@ -16,6 +16,7 @@
 #define MAX_LINE 4096
 #define MAX_POSTS 1000
 #define RSS_ITEMS_LIMIT 20
+#define WEBLOG_URL "https://smol.p1x.in/weblog/"  // Add base URL constant
 
 void read_template(const char *filename, char *buffer) {
     FILE *fp = fopen(filename, "r");
@@ -145,6 +146,7 @@ void generate_rss_feed(const char *posts_list) {
 
     while (line && items < RSS_ITEMS_LIMIT) {
         char title[MAX_LINE] = "", link[MAX_LINE] = "", date[64] = "";
+        char content[MAX_LINE * 10] = "";  // Added for post content
         
         // Extract title between first '>' and '</a>' without the HTML tags
         char *title_start = strchr(line, '>');
@@ -160,14 +162,41 @@ void generate_rss_feed(const char *posts_list) {
             title[title_end - clean_title_start] = '\0';
         }
 
-        // Extract link
+        // Extract link and make it absolute
         char *link_start = strstr(line, "href=\"");
+        char *link_end = NULL;
         if (link_start) {
             link_start += 6;
-            char *link_end = strchr(link_start, '"');
+            link_end = strchr(link_start, '"');
             if (link_end) {
-                strncpy(link, link_start, link_end - link_start);
-                link[link_end - link_start] = '\0';
+                char full_url[MAX_PATH];
+                snprintf(full_url, sizeof(full_url), "%s%.*s", 
+                        WEBLOG_URL, (int)(link_end - link_start), link_start);
+                strncpy(link, full_url, sizeof(link) - 1);
+                link[sizeof(link) - 1] = '\0';
+            }
+        }
+
+        // Extract and read content from txt file
+        char txt_path[MAX_PATH];
+        if (link_start && link_end) {
+            strncpy(txt_path, "public_html/", MAX_PATH);
+            strncat(txt_path, link_start, link_end - link_start);
+            txt_path[strlen(txt_path) - 5] = '\0';  // Remove .html
+            strcat(txt_path, ".txt");
+            
+            FILE *txt_file = fopen(txt_path, "r");
+            if (txt_file) {
+                char line_buf[MAX_LINE];
+                int first_line = 1;
+                while (fgets(line_buf, sizeof(line_buf), txt_file)) {
+                    if (first_line) {  // Skip the title (first line)
+                        first_line = 0;
+                        continue;
+                    }
+                    strcat(content, line_buf);
+                }
+                fclose(txt_file);
             }
         }
 
@@ -189,7 +218,7 @@ void generate_rss_feed(const char *posts_list) {
                 strftime(rfc822_date, sizeof(rfc822_date), "%a, %d %b %Y %H:%M:%S %z", &tm);
                 
                 if (strlen(title) > 0 && strlen(link) > 0) {
-                    fprintf(rss, item_template, title, link, link, rfc822_date);
+                    fprintf(rss, item_template, title, link, link, rfc822_date, content);
                     items++;
                 }
             }

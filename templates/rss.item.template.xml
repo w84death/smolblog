@@ -1,6 +1,7 @@
 <item>
     <title>%s</title>
-    <link>https://smol.p1x.in/weblog/%s</link>
-    <guid>https://smol.p1x.in/weblog/%s</guid>
+    <link>%s</link>
+    <guid>%s</guid>
     <pubDate>%s</pubDate>
-  </item>
+    <description><![CDATA[%s]]></description>
+</item>
