@@ -1,3 +1,9 @@
+// smolblog.c
+// A simple blog generator written in C.
+// This program watches a directory for new text files, processes them into HTML files, and updates the index page.
+// It also generates an RSS feed based on the latest posts.
+// Designed by Krzysztof Krystian Jankowski
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -118,7 +124,7 @@ void copy_static_assets() {
 }
 
 void generate_rss_feed(const char *posts_list) {
-    char rss_path[MAX_PATH] = "public_html/feed.xml";
+    char rss_path[MAX_PATH] = "public_html/rss.xml";
     FILE *rss = fopen(rss_path, "w");
     if (!rss) return;
 
@@ -133,7 +139,6 @@ void generate_rss_feed(const char *posts_list) {
 
     fprintf(rss, header_template, date_str);
 
-    // Parse posts_list and convert to RSS items
     char *post = strdup(posts_list);
     char *line = strtok(post, "\n");
     int items = 0;
@@ -141,23 +146,32 @@ void generate_rss_feed(const char *posts_list) {
     while (line && items < RSS_ITEMS_LIMIT) {
         char title[MAX_LINE] = "", link[MAX_LINE] = "", date[64] = "";
         
-        // Extract title between first '>' and '</a>'
+        // Extract title between first '>' and '</a>' without the HTML tags
         char *title_start = strchr(line, '>');
         char *title_end = strstr(line, "</a>");
         if (title_start && title_end) {
-            strncpy(title, title_start + 1, title_end - title_start - 1);
-            title[title_end - title_start - 1] = '\0';
+            // Skip any nested HTML tags in the title
+            char *clean_title_start = title_start + 1;
+            char *nested_tag = strstr(clean_title_start, "<");
+            if (nested_tag && nested_tag < title_end) {
+                clean_title_start = strchr(nested_tag, '>') + 1;
+            }
+            strncpy(title, clean_title_start, title_end - clean_title_start);
+            title[title_end - clean_title_start] = '\0';
         }
 
-        // Extract link between 'href="' and '"'
+        // Extract link
         char *link_start = strstr(line, "href=\"");
-        char *link_end = strchr(link_start + 6, '"');
-        if (link_start && link_end) {
-            strncpy(link, link_start + 6, link_end - link_start - 6);
-            link[link_end - link_start - 6] = '\0';
+        if (link_start) {
+            link_start += 6;
+            char *link_end = strchr(link_start, '"');
+            if (link_end) {
+                strncpy(link, link_start, link_end - link_start);
+                link[link_end - link_start] = '\0';
+            }
         }
 
-        // Extract date from span class="date"
+        // Extract and format date
         char *date_start = strstr(line, "class=\"date\">");
         if (date_start) {
             date_start += 13;
@@ -165,12 +179,20 @@ void generate_rss_feed(const char *posts_list) {
             if (date_end) {
                 strncpy(date, date_start, date_end - date_start);
                 date[date_end - date_start] = '\0';
+                
+                // Convert date to RFC822 format
+                struct tm tm = {0};
+                char rfc822_date[64];
+                sscanf(date, "%d-%d-%d %d:%d", &tm.tm_year, &tm.tm_mon, &tm.tm_mday, &tm.tm_hour, &tm.tm_min);
+                tm.tm_year -= 1900;
+                tm.tm_mon -= 1;
+                strftime(rfc822_date, sizeof(rfc822_date), "%a, %d %b %Y %H:%M:%S %z", &tm);
+                
+                if (strlen(title) > 0 && strlen(link) > 0) {
+                    fprintf(rss, item_template, title, link, link, rfc822_date);
+                    items++;
+                }
             }
-        }
-
-        if (strlen(title) > 0 && strlen(link) > 0) {
-            fprintf(rss, item_template, title, link, link, date);
-            items++;
         }
 
         line = strtok(NULL, "\n");

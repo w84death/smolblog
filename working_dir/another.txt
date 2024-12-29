@@ -1,5 +1,0 @@
-Test post
-This post is made using smolBlog platform.
-This post was updated!
-
-Huray!
